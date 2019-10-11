@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 )
 
+// NewJSONWriter creates a new SimpleWriter, marshalling via json.Marshal.
 func NewJSONWriter(options ...WriterOption) Writer {
 	defaults := []WriterOption{
 		ContentType("application/json;charset=utf-8"),
@@ -13,6 +14,7 @@ func NewJSONWriter(options ...WriterOption) Writer {
 	return NewSimpleWriter(append(defaults, options...)...)
 }
 
+// NewJSONIndentWriter creates a new SimpleWriter, marshalling via json.MarshalIndent.
 func NewJSONIndentWriter(prefix string, indent string, options ...WriterOption) Writer {
 	defaults := []WriterOption{
 		ContentType("application/json;charset=utf-8"),

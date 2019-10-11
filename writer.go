@@ -5,6 +5,9 @@ import (
 	"net/http"
 )
 
+// SimpleWriter is a simple implementation of emissiones Writer interface,
+// delegating writing duty to a specific marshaller, and setting the appropriate
+// content type header.
 type SimpleWriter struct {
 	marshallMethod func(v interface{}) ([]byte, error)
 	contentType    string
@@ -25,6 +28,9 @@ func (writer SimpleWriter) Write(w http.ResponseWriter, i interface{}) error {
 	return wErr
 }
 
+// NewSimpleWriter instantiates a new SimpleWriter.
+//
+// See the documentation for WriterOption for configuration options.
 func NewSimpleWriter(setters ...WriterOption) Writer {
 	// Default Options
 	args := &WriterOptions{

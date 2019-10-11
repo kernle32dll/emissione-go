@@ -40,6 +40,7 @@ import (
 	"net/http"
 )
 
+// User is a just sample struct for showcasing.
 type User struct {
 	Name string `json:"name",xml:"Name"`
 }

@@ -12,10 +12,14 @@ var (
 	defHandler = Default()
 )
 
+// Writer is a handler used by emissione, to deliver a specific
+// output to the client.
 type Writer interface {
 	Write(w http.ResponseWriter, i interface{}) error
 }
 
+// Handler is the core of emissione, defining the mapping of
+// accept header values to Writers.
 type Handler struct {
 	defaultHandler Writer
 	handlers       map[string]Writer
@@ -23,6 +27,7 @@ type Handler struct {
 	wildcardDetector *regexp.Regexp
 }
 
+// Default returns a opinionated configured emissione Handler.
 func Default() *Handler {
 	json := NewJSONIndentWriter("", "  ")
 	xml := NewXmlIndentWriter("", "  ")
@@ -40,6 +45,7 @@ func Default() *Handler {
 	)
 }
 
+// New returns a user-configured emissione Handler.
 func New(defaultHandler Writer, handlerMapping map[string]Writer) *Handler {
 	wildcardDetector, err := regexp.Compile(".*?/\\*(;q=[\\d.]+)?")
 	if err != nil {
@@ -137,6 +143,8 @@ func (h Handler) findPartialWriterMatch(mimeType string) Writer {
 	return applicableHandlers[handlerKeys[0]]
 }
 
+// Write writes the given status code and object to the ResponseWriter.
+// The Request object is used to resolve the desired output type.
 func (h Handler) Write(w http.ResponseWriter, r *http.Request, code int, i interface{}) {
 	w.WriteHeader(code)
 
@@ -145,6 +153,10 @@ func (h Handler) Write(w http.ResponseWriter, r *http.Request, code int, i inter
 	}
 }
 
+// Write is a convenience method, using the internal default handler of emissione.
+// This handler is configured via the Default method of this package.
+//
+// The the documentation for Handler#Write
 func Write(w http.ResponseWriter, r *http.Request, code int, i interface{}) {
 	defHandler.Write(w, r, code, i)
 }
