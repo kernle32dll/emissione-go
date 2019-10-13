@@ -41,6 +41,8 @@ func TestHandler_Write(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			w := httptest.NewRecorder()
 
 			Write(w, &http.Request{Header: map[string][]string{"Accept": tt.accepts}}, http.StatusTeapot, sampleObject)
