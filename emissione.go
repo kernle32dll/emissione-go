@@ -18,11 +18,14 @@ type Writer interface {
 	Write(w http.ResponseWriter, i interface{}) error
 }
 
+// WriterMapping is a convenience alias for map[string]Writer
+type WriterMapping map[string]Writer
+
 // Handler is the core of emissione, defining the mapping of
 // accept header values to Writers.
 type Handler struct {
 	defaultHandler Writer
-	handlers       map[string]Writer
+	handlers       WriterMapping
 
 	wildcardDetector *regexp.Regexp
 }
@@ -34,7 +37,7 @@ func Default() *Handler {
 
 	return New(
 		json,
-		map[string]Writer{
+		WriterMapping{
 			"application/json":                json,
 			"application/json;charset=utf-8":  json,
 			"application/json; charset=utf-8": json,
@@ -46,13 +49,13 @@ func Default() *Handler {
 }
 
 // New returns a user-configured emissione Handler.
-func New(defaultHandler Writer, handlerMapping map[string]Writer) *Handler {
+func New(defaultHandler Writer, handlerMapping WriterMapping) *Handler {
 	wildcardDetector, err := regexp.Compile(".*?/\\*(;q=[\\d.]+)?")
 	if err != nil {
 		panic(fmt.Sprintf("unexpected error building regex: %s", err))
 	}
 
-	lowerCaseMapping := make(map[string]Writer, len(handlerMapping))
+	lowerCaseMapping := make(WriterMapping, len(handlerMapping))
 	for k, v := range handlerMapping {
 		lowerCaseMapping[strings.ToLower(k)] = v
 	}
@@ -128,7 +131,7 @@ func (h Handler) findWriterByType(acceptType string) Writer {
 }
 
 func (h Handler) findPartialWriterMatch(mimeType string) Writer {
-	applicableHandlers := map[string]Writer{}
+	applicableHandlers := WriterMapping{}
 
 	// Find all handlers which are applicable
 	for k, v := range h.handlers {
