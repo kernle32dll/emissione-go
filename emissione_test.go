@@ -123,8 +123,6 @@ func TestHandler_Write_buffer_error(t *testing.T) {
 		expectedErr,
 	}
 
-	httptest.NewRecorder()
-
 	// Catch panic
 	defer func() {
 		if got := w.Body.String(); got != "" {
