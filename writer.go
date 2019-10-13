@@ -37,7 +37,7 @@ func NewSimpleWriter(setters ...WriterOption) Writer {
 		MarshallMethod: func(v interface{}) (bytes []byte, e error) {
 			return []byte(fmt.Sprint(v)), nil
 		},
-		ContentType: "application/json",
+		ContentType: "text/plain",
 	}
 
 	for _, setter := range setters {
