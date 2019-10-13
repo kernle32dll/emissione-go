@@ -23,6 +23,15 @@ func (mockWriter MockWriter) Write(w http.ResponseWriter, i interface{}) error {
 	return mockWriter.errorOut
 }
 
+type ErrorResponseWriter struct {
+	*httptest.ResponseRecorder
+	err error
+}
+
+func (w *ErrorResponseWriter) Write(b []byte) (int, error) {
+	return 0, w.err
+}
+
 func TestHandler_Write(t *testing.T) {
 	jsonOut, xmlOut := "json", "xml"
 
@@ -71,7 +80,7 @@ func TestHandler_Write(t *testing.T) {
 	}
 }
 
-func TestHandler_Write_error(t *testing.T) {
+func TestHandler_Write_writer_error(t *testing.T) {
 	expectedErr := errors.New("some-error")
 	errorWriter := &MockWriter{"", expectedErr}
 
@@ -81,6 +90,40 @@ func TestHandler_Write_error(t *testing.T) {
 	)
 
 	w := httptest.NewRecorder()
+
+	// Catch panic
+	defer func() {
+		if got := w.Body.String(); got != "" {
+			t.Errorf("Write() = %v, want %v", got, "")
+		}
+
+		if r := recover(); r != nil {
+			if r != expectedErr {
+				t.Errorf("Write_error() = %v, want %v", r, expectedErr)
+			}
+		}
+	}()
+	writer.Write(w, &http.Request{}, http.StatusTeapot, struct{}{})
+
+	t.Errorf("Write_error() = %v, want %v", nil, expectedErr)
+}
+
+func TestHandler_Write_buffer_error(t *testing.T) {
+	errorWriter := &MockWriter{"discarded", nil}
+
+	writer := emissione.New(
+		errorWriter,
+		nil,
+	)
+
+	expectedErr := errors.New("some-error")
+
+	w := &ErrorResponseWriter{
+		httptest.NewRecorder(),
+		expectedErr,
+	}
+
+	httptest.NewRecorder()
 
 	// Catch panic
 	defer func() {

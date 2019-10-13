@@ -1,6 +1,7 @@
 package emissione
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
 	"regexp"
@@ -148,9 +149,15 @@ func (h Handler) Write(w http.ResponseWriter, r *http.Request, code int, i inter
 	writer := h.findWriterByRequest(r)
 
 	if writer != nil {
-		w.WriteHeader(code)
+		// Buffer the result first, to catch encoding errors
+		sw := &statusWriter{ResponseWriter: w, Body: new(bytes.Buffer)}
+		if err := writer.Write(sw, i); err != nil {
+			panic(err)
+		}
 
-		if err := writer.Write(w, i); err != nil {
+		w.WriteHeader(code)
+		if _, err := sw.Body.WriteTo(w); err != nil {
+			// welp, we did our best - something is terribly broken
 			panic(err)
 		}
 	} else {
@@ -161,4 +168,18 @@ func (h Handler) Write(w http.ResponseWriter, r *http.Request, code int, i inter
 		// e.g. if the client requested XML from a JSON-only API,
 		// it makes no sense to respond with a JSON style error.
 	}
+}
+
+// statusWriter is a helper to buffer
+type statusWriter struct {
+	http.ResponseWriter
+	Body *bytes.Buffer
+}
+
+func (w *statusWriter) WriteHeader(status int) {
+	// NOP
+}
+
+func (w *statusWriter) Write(b []byte) (int, error) {
+	return w.Body.Write(b)
 }
