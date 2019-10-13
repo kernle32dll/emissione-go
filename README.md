@@ -65,7 +65,7 @@ Use the following curl calls, to see the code in action:
 
 ## Extending emissione
 
-Extending emissione is straight forward. Simple use `emissione.New(...)` to define a custom mapping, and if nessecary implement
-emissione `Writer` interface. A simple implementation used by emissione itself it its `SimpleWriter`, which simply implements
-the `Writer` interface by delegating it to a marshalling method. This allows for drop-in usage of Go's own marshall methods,
-such as `json.Marshal` and `xml.Marshal`, or [jsoniter](https://github.com/json-iterator/go).
+Extending emissione is straight forward. Simple use `emissione.New(...)` to define a custom mapping, and if necessary implement
+the emissione `Writer` interface. A simple implementation used by emissione itself is `SimpleWriter`, which simply implements
+the `Writer` interface by delegating to a marshalling method, and setting the appropiate `Content-Type` header. This allows
+for drop-in usage of Go's own marshall methods, such as `json.Marshal` and `xml.Marshal`, or [jsoniter](https://github.com/json-iterator/go).
