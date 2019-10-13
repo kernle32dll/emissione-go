@@ -1,9 +1,10 @@
 package emissione_test
 
 import (
+	"github.com/kernle32dll/emissione-go"
+
 	"errors"
 	"fmt"
-	"github.com/kernle32dll/emissione-go"
 	"net/http/httptest"
 	"testing"
 )
@@ -21,17 +22,7 @@ func TestSimpleWriter_Write(t *testing.T) {
 
 		writer := emissione.NewSimpleWriter()
 
-		if err := writer.Write(w, sampleObject); err != nil {
-			t.Errorf("Write() error = %v, wantErr %v", err, nil)
-		}
-
-		if got := w.Body.String(); got != simpleMarshalled {
-			t.Errorf("Write() = %s, want %s", got, simpleMarshalled)
-		}
-
-		if got := w.Header().Get("Content-Type"); got != "text/plain" {
-			t.Errorf("Write() = %s, want %s", got, "text/plain")
-		}
+		assertState(t, w, writer, sampleObject, "text/plain", simpleMarshalled, nil)
 	})
 
 	t.Run("existing-content-type", func(t *testing.T) {
@@ -42,17 +33,7 @@ func TestSimpleWriter_Write(t *testing.T) {
 			emissione.ContentType("not-used"),
 		)
 
-		if err := writer.Write(w, sampleObject); err != nil {
-			t.Errorf("Write() error = %v, wantErr %v", err, nil)
-		}
-
-		if got := w.Body.String(); got != simpleMarshalled {
-			t.Errorf("Write() = %s, want %s", got, simpleMarshalled)
-		}
-
-		if got := w.Header().Get("Content-Type"); got != "text/plain" {
-			t.Errorf("Write() = %s, want %s", got, "text/plain")
-		}
+		assertState(t, w, writer, sampleObject, "text/plain", simpleMarshalled, nil)
 	})
 
 	t.Run("error", func(t *testing.T) {
@@ -66,16 +47,21 @@ func TestSimpleWriter_Write(t *testing.T) {
 			}),
 		)
 
-		if err := writer.Write(w, sampleObject); err != expectedErr {
-			t.Errorf("Write() error = %v, wantErr %v", err, expectedErr)
-		}
-
-		if got := w.Body.String(); got != "" {
-			t.Errorf("Write() = %s, want %s", got, "")
-		}
-
-		if got := w.Header().Get("Content-Type"); got != "text/plain" {
-			t.Errorf("Write() = %s, want %s", got, "text/plain")
-		}
+		assertState(t, w, writer, sampleObject, "text/plain", "", expectedErr)
 	})
+}
+
+func assertState(
+	t *testing.T, w *httptest.ResponseRecorder, writer emissione.Writer,
+	object interface{}, expectedContentType string, expectedOutput string, expectedError error,
+) {
+	if err := writer.Write(w, object); err != expectedError {
+		t.Errorf("Write() error = %v, want %v", err, expectedError)
+	}
+	if got := w.Body.String(); got != expectedOutput {
+		t.Errorf("Write() = %s, want %s", got, expectedOutput)
+	}
+	if got := w.Header().Get("Content-Type"); got != expectedContentType {
+		t.Errorf("Write() = %s, want %s", got, expectedContentType)
+	}
 }
