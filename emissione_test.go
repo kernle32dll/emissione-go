@@ -1,6 +1,8 @@
-package emissione
+package emissione_test
 
 import (
+	"github.com/kernle32dll/emissione-go"
+
 	"encoding/json"
 	"encoding/xml"
 	"net/http"
@@ -25,6 +27,8 @@ func TestHandler_Write(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	writer := emissione.Default()
+
 	tests := []struct {
 		name    string
 		accepts []string
@@ -45,7 +49,7 @@ func TestHandler_Write(t *testing.T) {
 
 			w := httptest.NewRecorder()
 
-			Write(w, &http.Request{Header: map[string][]string{"Accept": tt.accepts}}, http.StatusTeapot, sampleObject)
+			writer.Write(w, &http.Request{Header: map[string][]string{"Accept": tt.accepts}}, http.StatusTeapot, sampleObject)
 
 			if got := w.Body.String(); got != tt.want {
 				t.Errorf("Write() = %v, want %v", got, tt.want)

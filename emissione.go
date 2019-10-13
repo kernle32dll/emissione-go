@@ -8,10 +8,6 @@ import (
 	"strings"
 )
 
-var (
-	defHandler = Default()
-)
-
 // Writer is a handler used by emissione, to deliver a specific
 // output to the client.
 type Writer interface {
@@ -154,12 +150,4 @@ func (h Handler) Write(w http.ResponseWriter, r *http.Request, code int, i inter
 	if err := h.findWriterByRequest(r).Write(w, i); err != nil {
 		panic(err)
 	}
-}
-
-// Write is a convenience method, using the internal default handler of emissione.
-// This handler is configured via the Default method of this package.
-//
-// The the documentation for Handler#Write
-func Write(w http.ResponseWriter, r *http.Request, code int, i interface{}) {
-	defHandler.Write(w, r, code, i)
 }
