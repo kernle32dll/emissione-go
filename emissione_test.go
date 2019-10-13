@@ -98,3 +98,22 @@ func TestHandler_Write_error(t *testing.T) {
 
 	t.Errorf("Write_error() = %v, want %v", nil, expectedErr)
 }
+
+func TestHandler_Write_unsupported(t *testing.T) {
+	writer := emissione.New(
+		nil,
+		nil,
+	)
+
+	w := httptest.NewRecorder()
+
+	writer.Write(w, &http.Request{}, http.StatusTeapot, struct{}{})
+
+	if w.Code != http.StatusUnsupportedMediaType {
+		t.Errorf("Write_unsupported() = %v, want %v", w.Code, http.StatusUnsupportedMediaType)
+	}
+
+	if got := w.Body.String(); got != "" {
+		t.Errorf("Write_unsupported() = %v, want %v", got, "")
+	}
+}

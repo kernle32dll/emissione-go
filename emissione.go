@@ -145,9 +145,20 @@ func (h Handler) findPartialWriterMatch(mimeType string) Writer {
 // Write writes the given status code and object to the ResponseWriter.
 // The Request object is used to resolve the desired output type.
 func (h Handler) Write(w http.ResponseWriter, r *http.Request, code int, i interface{}) {
-	w.WriteHeader(code)
+	writer := h.findWriterByRequest(r)
 
-	if err := h.findWriterByRequest(r).Write(w, i); err != nil {
-		panic(err)
+	if writer != nil {
+		w.WriteHeader(code)
+
+		if err := writer.Write(w, i); err != nil {
+			panic(err)
+		}
+	} else {
+		w.WriteHeader(http.StatusUnsupportedMediaType)
+
+		// Don't write anything. If we don't have a writer, we can't
+		// reliably give the client back anything useful.
+		// e.g. if the client requested XML from a JSON-only API,
+		// it makes no sense to respond with a JSON style error.
 	}
 }
