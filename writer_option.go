@@ -1,11 +1,12 @@
 package emissione
 
-// WriterOption is the option-wrapper for defining the workings of a Writer.
+// WriterOptions is the option-wrapper for defining the workings of a Writer.
 type WriterOptions struct {
 	MarshallMethod func(v interface{}) ([]byte, error)
 	ContentType    string
 }
 
+// WriterOption is functional option to WriterOptions.
 type WriterOption func(*WriterOptions)
 
 // MarshallMethod defines the marshalling method used by a SimpleWriter
