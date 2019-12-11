@@ -94,7 +94,7 @@ func (h Handler) findWriterByRequest(r *http.Request) Writer {
 
 func (h Handler) findWriterByType(acceptType string) Writer {
 	// 1: Wildcard?
-	if acceptType == "*/*" {
+	if strings.HasPrefix(acceptType, "*/*") {
 		return h.defaultHandler
 	}
 

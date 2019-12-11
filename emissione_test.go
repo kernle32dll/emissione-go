@@ -59,6 +59,7 @@ func TestHandler_Write(t *testing.T) {
 		{"application/*", []string{"application/*"}, jsonOut},
 		{"application/xml", []string{"application/xml"}, xmlOut},
 		{"weighted", []string{"application/*, application/xml;q=2"}, xmlOut},
+		{"weighted wildcard", []string{"*/*;q=2"}, jsonOut},
 	}
 	for i := range tests {
 		tt := tests[i]
