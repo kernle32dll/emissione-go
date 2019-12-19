@@ -2,6 +2,7 @@ package emissione
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -10,22 +11,39 @@ import (
 // content type header.
 type SimpleWriter struct {
 	marshallMethod func(v interface{}) ([]byte, error)
+	streamMethod   func(v interface{}) (io.Reader, error)
 	contentType    string
 }
 
-func (writer SimpleWriter) Write(w http.ResponseWriter, i interface{}) error {
+func (writer SimpleWriter) Write(w http.ResponseWriter, i interface{}) (returnErr error) {
 	// Set content type, if not already set
 	if len(w.Header().Get("Content-Type")) == 0 {
 		w.Header().Set("Content-Type", writer.contentType)
 	}
 
-	bytes, err := writer.marshallMethod(i)
-	if err != nil {
-		return err
-	}
+	if writer.streamMethod != nil {
+		stream, err := writer.streamMethod(i)
+		if err != nil {
+			return err
+		}
 
-	_, wErr := w.Write(bytes)
-	return wErr
+		if autoClose, isAutoClose := stream.(io.ReadCloser); isAutoClose {
+			defer func() {
+				returnErr = autoClose.Close()
+			}()
+		}
+
+		_, sErr := io.Copy(w, stream)
+		return sErr
+	} else {
+		bytes, err := writer.marshallMethod(i)
+		if err != nil {
+			return err
+		}
+
+		_, wErr := w.Write(bytes)
+		return wErr
+	}
 }
 
 // NewSimpleWriter instantiates a new SimpleWriter.
@@ -37,7 +55,8 @@ func NewSimpleWriter(setters ...WriterOption) Writer {
 		MarshallMethod: func(v interface{}) (bytes []byte, e error) {
 			return []byte(fmt.Sprint(v)), nil
 		},
-		ContentType: "text/plain",
+		StreamMethod: nil,
+		ContentType:  "text/plain",
 	}
 
 	for _, setter := range setters {
@@ -46,6 +65,7 @@ func NewSimpleWriter(setters ...WriterOption) Writer {
 
 	return &SimpleWriter{
 		marshallMethod: args.MarshallMethod,
+		streamMethod:   args.StreamMethod,
 		contentType:    args.ContentType,
 	}
 }

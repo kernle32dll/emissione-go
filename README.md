@@ -63,6 +63,20 @@ Use the following curl calls, to see the code in action:
 
 `curl -H "Accept: application/xml" localhost:8080/user`
 
+## Disabling stream support
+
+As of 1.1.0, the emissione simple writer (and its implementations) has gained support for streaming responses.
+
+It is now possible to configure a simple writer to use streaming via `emissione.StreamMethod(...)`.
+If configured, the streaming method will take precedence over the "old" marshall method.
+
+Per default, all provided writer implementations, and thus the emissione default handler, too, are now configured
+**with** streaming. It can be disabled by using `emissione.StreamMethod(nil)`, anywhere an option argument is
+expected. For example, `emissione.Default(emissione.StreamMethod(nil))` creates the default handler with
+streaming disabled.
+
+For implementation details, it is worthwhile to look at the [JSON writer](./writer_json.go) implementation.
+
 ## Extending emissione
 
 Extending emissione is straight forward. Simple use `emissione.New(...)` to define a custom mapping, and if necessary implement

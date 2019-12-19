@@ -28,9 +28,9 @@ type Handler struct {
 }
 
 // Default returns a opinionated configured emissione Handler.
-func Default() *Handler {
-	json := NewJSONIndentWriter("", "  ")
-	xml := NewXmlIndentWriter("", "  ")
+func Default(options ...WriterOption) *Handler {
+	json := NewJSONIndentWriter("", "  ", options...)
+	xml := NewXmlIndentWriter("", "  ", options...)
 
 	return New(
 		json,

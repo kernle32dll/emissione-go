@@ -1,8 +1,11 @@
 package emissione
 
+import "io"
+
 // WriterOptions is the option-wrapper for defining the workings of a Writer.
 type WriterOptions struct {
 	MarshallMethod func(v interface{}) ([]byte, error)
+	StreamMethod   func(v interface{}) (io.Reader, error)
 	ContentType    string
 }
 
@@ -14,6 +17,14 @@ type WriterOption func(*WriterOptions)
 func MarshallMethod(method func(v interface{}) ([]byte, error)) WriterOption {
 	return func(args *WriterOptions) {
 		args.MarshallMethod = method
+	}
+}
+
+// StreamMethod defines a streaming marshalling method used by a SimpleWriter
+// to marshall output objects.
+func StreamMethod(method func(v interface{}) (io.Reader, error)) WriterOption {
+	return func(args *WriterOptions) {
+		args.StreamMethod = method
 	}
 }
 

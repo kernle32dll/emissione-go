@@ -21,7 +21,7 @@ func TestXMLWriter(t *testing.T) {
 			t.Error(mErr)
 		}
 
-		writer := emissione.NewXmlWriter()
+		writer := emissione.NewXmlWriter(emissione.StreamMethod(nil))
 
 		w := httptest.NewRecorder()
 
@@ -41,6 +41,56 @@ func TestXMLWriter(t *testing.T) {
 	})
 
 	t.Run("indent", func(t *testing.T) {
+		xmlMarshalled, mErr := xml.MarshalIndent(sampleObject, "x", "**")
+		if mErr != nil {
+			t.Error(mErr)
+		}
+
+		writer := emissione.NewXmlIndentWriter("x", "**", emissione.StreamMethod(nil))
+
+		w := httptest.NewRecorder()
+
+		if writer.Write(w, sampleObject) != nil {
+			t.Errorf("TestXMLWriter() unpexected error")
+		}
+
+		want := string(xmlMarshalled)
+		if got := w.Body.String(); got != want {
+			t.Errorf("TestXMLWriter() = %v, want %v", got, want)
+		}
+
+		wantHeader := "application/xml;charset=utf-8"
+		if got := w.Header().Get("Content-Type"); got != wantHeader {
+			t.Errorf("TestXMLWriter() = %v, want %v", got, wantHeader)
+		}
+	})
+
+	t.Run("simple-stream", func(t *testing.T) {
+		xmlMarshalled, mErr := xml.Marshal(sampleObject)
+		if mErr != nil {
+			t.Error(mErr)
+		}
+
+		writer := emissione.NewXmlWriter()
+
+		w := httptest.NewRecorder()
+
+		if writer.Write(w, sampleObject) != nil {
+			t.Errorf("TestXMLWriter() unpexected error")
+		}
+
+		want := string(xmlMarshalled)
+		if got := w.Body.String(); got != want {
+			t.Errorf("TestXMLWriter() = %v, want %v", got, want)
+		}
+
+		wantHeader := "application/xml;charset=utf-8"
+		if got := w.Header().Get("Content-Type"); got != wantHeader {
+			t.Errorf("TestXMLWriter() = %v, want %v", got, wantHeader)
+		}
+	})
+
+	t.Run("indent-stream", func(t *testing.T) {
 		xmlMarshalled, mErr := xml.MarshalIndent(sampleObject, "x", "**")
 		if mErr != nil {
 			t.Error(mErr)
