@@ -69,3 +69,7 @@ Extending emissione is straight forward. Simple use `emissione.New(...)` to defi
 the emissione `Writer` interface. A simple implementation used by emissione itself is `SimpleWriter`, which simply implements
 the `Writer` interface by delegating to a marshalling method, and setting the appropriate `Content-Type` header. This allows
 for drop-in usage of Go's own marshall methods, such as `json.Marshal` and `xml.Marshal`, or [jsoniter](https://github.com/json-iterator/go).
+
+## Compatibility
+
+emissione-go is automatically tested against Go 1.13.X, 1.14.X and 1.15.X.
