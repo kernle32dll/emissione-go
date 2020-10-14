@@ -1,3 +1,3 @@
 module github.com/kernle32dll/emissione-go
 
-go 1.12
+go 1.13
